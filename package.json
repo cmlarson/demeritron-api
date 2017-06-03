@@ -1,0 +1,19 @@
+{
+  "name": "demeritron-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cmlarson/demeritron-api.git"
+  },
+  "author": "c_larson91@live.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cmlarson/demeritron-api/issues"
+  },
+  "homepage": "https://github.com/cmlarson/demeritron-api#readme"
+}
