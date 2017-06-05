@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 const port = process.env.PORT || 3000;
 const router = express.Router(); 
+const apiKey = process.env.API_KEY;
 
 // Graph DB
 const dbUrl = process.env.GRAPHENEDB_URL;
@@ -20,13 +21,16 @@ router.get('/health', function(req, res) {
 request body:
 {
     "from": string,
-    "to": string
+    "to": string,
+    "apiKey": string
 }
 */
 router.post('/demerits', function(req, res) {
     console.log(req.body);
     if (!req.body.to || !req.body.from) {
         res.status(400).json({message: "missing required field 'to' or 'from'"});
+    } else if (!req.body.apiKey || req.body.apiKey != apiKey) {
+        res.status(401).json({message: "invalid field 'apiKey'"})
     } else {
         const to = req.body.to.toLowerCase();
         const from = req.body.from.toLowerCase();

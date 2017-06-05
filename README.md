@@ -17,7 +17,8 @@ Give a demerit from one user to another
 ```
 {
     "to": string,
-    "from": string
+    "from": string,
+    "apiKey": string
 }
 ```
 
