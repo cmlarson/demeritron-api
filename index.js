@@ -82,19 +82,28 @@ router.get('/demerits', function(req, res) {
     }).then(() => {
         return fetchDemerits();
     }).then((demerits) => {
+        let maxDemeritsGiven = 0;
+        let maxDemeritsReceived = 0;
+        let maxDemeritRelationship = 0;
+        let totalDemerits = 0;
         for (let user of users) {
             user.received = 0;
             user.given = 0;
             for (let demerit of demerits) {
                 if (demerit.source == user.id) {
                     user.given = user.given + demerit.count;
+                    maxDemeritRelationship = (maxDemeritRelationship > user.given) ? maxDemeritRelationship : user.given;
                 }
                 if (demerit.target == user.id) {
                     user.received = user.received + demerit.count;
+                    maxDemeritRelationship = (maxDemeritRelationship > user.received) ? maxDemeritRelationship : user.received;
                 }
             }
+            totalDemerits = totalDemerits + user.given;
+            maxDemeritsReceived = (maxDemeritsReceived > user.received) ? maxDemeritsReceived : user.received;
+            maxDemeritsGiven = (maxDemeritsGiven > user.given) ? maxDemeritsGiven : user.given;
         }
-        res.json({nodes: users, edges: demerits});
+        res.json({nodes: users, edges: demerits, maxDemeritsGiven: maxDemeritsGiven, maxDemeritsReceived: maxDemeritsReceived, maxDemeritRelationship: maxDemeritRelationship});
     }).catch((error) => {
         console.log(error);
         res.status(500).json({message: "An error occurred"});
