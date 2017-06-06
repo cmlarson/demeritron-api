@@ -38,23 +38,25 @@ router.post('/demerits', function(req, res) {
             // Make Cypher requests to Db server
             userExists(to).then((toUserExists) => {
                 if (!toUserExists) {
-                    createUser(to);
+                    return createUser(to);
                 }
             }).then(() => {
                 return userExists(from);
             }).then((fromUserExists) => {
                 if (!fromUserExists) {
-                    createUser(from)
+                    return createUser(from)
                 }
             }).then(() => {
                 return relationshipExists(to, from);
             }).then((relationshipExists) => {
                 if (relationshipExists) {
-                    getDemeritCount(to, from).then((currentCount) => {
-                        incrementDemeritCount(to, from, currentCount);
+                    console.log("updating relationship");
+                    return getDemeritCount(to, from).then((currentCount) => {
+                        return incrementDemeritCount(to, from, currentCount);
                     });
                 } else {
-                    createRelationship(to, from);
+                    console.log("creating relationship");
+                    return createRelationship(to, from);
                 }
             }).catch((error) => {
                 console.log(error);
