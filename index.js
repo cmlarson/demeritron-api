@@ -76,8 +76,13 @@ router.post('/demerits', function(req, res) {
 
 router.get('/demerits', function(req, res) {
     // Do graph db stuff
-    fetchData().then((data) => {
-        res.json(data);
+    let users = {};
+    fetchUsers().then((userData) => {
+        users = userData;
+    }).then(() => {
+        return fetchDemerits();
+    }).then((demerits) => {
+        res.json({nodes: users, edges: demerits});
     }).catch((error) => {
         console.log(error);
         res.status(500).json({message: "An error occurred"});
@@ -218,7 +223,7 @@ function incrementDemeritCount(to, from, currentCount) {
     });
 }
 
-function fetchData() {
+function fetchUsers() {
     return new Promise((resolve, reject) => {
         db.cypher({
             query: 'MATCH (user:Slacker) RETURN user',
@@ -228,7 +233,41 @@ function fetchData() {
                 reject();
             } else {
                 console.log('returning all data');
-                resolve(results);
+                let nodes = [];
+                for (let node of results) {
+                    console.log(node);
+                    nodes.push({
+                        id: node.user._id,
+                        title: node.user.properties.name
+                    });
+                }
+                resolve(nodes);
+            }
+        })
+    })
+}
+
+function fetchDemerits() {
+    return new Promise((resolve, reject) => {
+        db.cypher({
+            query: 'MATCH (from:Slacker)-[relationship:GAVE_DEMERIT]->(to:Slacker) RETURN relationship',
+        }, function(err, results){
+            if (err) {
+                console.error('Error fetching all data:', err);
+                reject();
+            } else {
+                console.log('returning all data');
+                let nodes = [];
+                for (let node of results) {
+                    console.log(node);
+                    nodes.push({
+                        source: node.relationship._fromId,
+                        target: node.relationship._toId,
+                        title: "Gave Demerit",
+                        count: node.relationship.properties.count
+                    });
+                }
+                resolve(nodes);
             }
         })
     })
