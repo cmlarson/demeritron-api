@@ -103,7 +103,7 @@ router.get('/demerits', function(req, res) {
             maxDemeritsReceived = (maxDemeritsReceived > user.received) ? maxDemeritsReceived : user.received;
             maxDemeritsGiven = (maxDemeritsGiven > user.given) ? maxDemeritsGiven : user.given;
         }
-        res.json({nodes: users, edges: demerits, maxDemeritsGiven: maxDemeritsGiven, maxDemeritsReceived: maxDemeritsReceived, maxDemeritRelationship: maxDemeritRelationship});
+        res.json({nodes: users, edges: demerits, maxDemeritsGiven: maxDemeritsGiven, maxDemeritsReceived: maxDemeritsReceived, maxDemeritRelationship: maxDemeritRelationship, totalDemerits: totalDemerits});
     }).catch((error) => {
         console.log(error);
         res.status(500).json({message: "An error occurred"});
