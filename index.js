@@ -82,6 +82,18 @@ router.get('/demerits', function(req, res) {
     }).then(() => {
         return fetchDemerits();
     }).then((demerits) => {
+        for (let user of users) {
+            user.received = 0;
+            user.given = 0;
+            for (let demerit of demerits) {
+                if (demerit.source == user.id) {
+                    user.given = user.given + demerit.count;
+                }
+                if (demerit.target == user.id) {
+                    user.received = user.received + demerit.count;
+                }
+            }
+        }
         res.json({nodes: users, edges: demerits});
     }).catch((error) => {
         console.log(error);
