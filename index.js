@@ -221,7 +221,7 @@ function incrementDemeritCount(to, from, currentCount) {
 function fetchData() {
     return new Promise((resolve, reject) => {
         db.cypher({
-            query: 'MATCH (from:Slacker)-[action:GAVE_DEMERIT]->(to:Slacker) RETURN from, to, action'
+            query: 'MATCH (user:Slacker) RETURN user',
         }, function(err, results){
             if (err) {
                 console.error('Error fetching all data:', err);
@@ -230,6 +230,6 @@ function fetchData() {
                 console.log('returning all data');
                 resolve(results);
             }
-        });
-    });
+        })
+    })
 }
