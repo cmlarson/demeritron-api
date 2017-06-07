@@ -22,6 +22,25 @@ Give a demerit from one user to another
 }
 ```
 
-### Fetch Data
+### Add Mention
+Give a demerit from one user to another
+`POST /mentions`
+```
+{
+    "to": string,
+    "from": string,
+    "apiKey": string
+}
+```
+
+### Fetch Demerit Data
 Returns all users and their relational demerit data
 `GET /demerits`
+
+### Fetch Mention Data
+Returns all users and their relational mention data
+`GET /mentions`
+
+### Fetch All Data
+Returns all users and their relational data
+`GET /data`
