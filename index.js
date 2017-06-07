@@ -34,6 +34,9 @@ router.post('/demerits', function(req, res) {
     } else {
         const to = req.body.to.toLowerCase();
         const from = req.body.from.toLowerCase();
+        if (to == from) {
+            res.status(200).json({ message: "No changes made" });
+        }
         try {
             // Make Cypher requests to Db server
             userExists(to).then((toUserExists) => {
@@ -83,6 +86,9 @@ router.post('/mentions', function(req, res) {
     } else {
         const to = req.body.to.toLowerCase();
         const from = req.body.from.toLowerCase();
+        if (to == from) {
+            res.status(200).json({ message: "No changes made" });
+        }
         try {
             // Make Cypher requests to Db server
             userExists(to).then((toUserExists) => {
