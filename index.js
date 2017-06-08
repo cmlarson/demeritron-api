@@ -230,11 +230,13 @@ router.get('/data', function(req, res) {
                     user.mentionsReceived = user.mentionsReceived + mention.count;
                     maxMentionRelationship = (maxMentionRelationship > user.mentionsReceived) ? maxMentionRelationship : user.mentionsReceived;
                 }
-                relationships.push(mention);
             }
             totalMentions = totalMentions + user.mentionsGiven;
             maxMentionsReceived = (maxMentionsReceived > user.mentionsReceived) ? maxMentionsReceived : user.mentionsReceived;
             maxMentionsGiven = (maxMentionsGiven > user.mentionsGiven) ? maxMentionsGiven : user.mentionsGiven;
+        }
+        for (let mention of mentions) {
+            relationships.push(mention);
         }
     }).then(() => {
         return fetchDemerits();
@@ -251,11 +253,13 @@ router.get('/data', function(req, res) {
                     user.demeritsReceived = user.demeritsReceived + demerit.count;
                     maxDemeritRelationship = (maxDemeritRelationship > user.demeritsReceived) ? maxDemeritRelationship : user.demeritsReceived;
                 }
-                relationships.push(demerit);
             }
             totalDemerits = totalDemerits + user.demeritsGiven;
             maxDemeritsReceived = (maxDemeritsReceived > user.demeritsReceived) ? maxDemeritsReceived : user.demeritsReceived;
             maxDemeritsGiven = (maxDemeritsGiven > user.demeritsGiven) ? maxDemeritsGiven : user.demeritsGiven;
+        }
+        for (let demerit of demerits) {
+            relationships.push(demerit);
         }
         res.json({nodes: users, edges: relationships, maxMentionsGiven: maxMentionsGiven, maxMentionsReceived: maxMentionsReceived, maxMentionRelationship: maxMentionRelationship, totalMentions: totalMentions, maxDemeritsGiven: maxDemeritsGiven, maxDemeritsReceived: maxDemeritsReceived, maxDemeritRelationship: maxDemeritRelationship, totalDemerits: totalDemerits});
     }).catch((error) => {
