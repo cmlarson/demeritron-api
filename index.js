@@ -685,7 +685,7 @@ function fetchMentions() {
 function fetchDemeritsRelatedToUser(username) {
     return new Promise((resolve, reject) => {
         db.cypher({
-            query: 'MATCH (from:Slacker)-[relationship:GAVE_DEMERIT]-(to:Slacker) WHERE from.name = {user} OR to.name = {user} RETURN relationship',
+            query: 'MATCH (from:Slacker)-[relationship:GAVE_DEMERIT]-(to:Slacker) WHERE from.name = {user} OR to.name = {user} RETURN distinct relationship',
             params: {
                 user: username,
             }
@@ -714,7 +714,7 @@ function fetchDemeritsRelatedToUser(username) {
 function fetchMentionsRelatedToUser(username) {
     return new Promise((resolve, reject) => {
         db.cypher({
-            query: 'MATCH (from:Slacker)-[relationship:MENTIONED]-(to:Slacker) WHERE from.name = {user} OR to.name = {user} RETURN relationship',
+            query: 'MATCH (from:Slacker)-[relationship:MENTIONED]-(to:Slacker) WHERE from.name = {user} OR to.name = {user} RETURN distinct relationship',
             params: {
                 user: username,
             }
