@@ -281,7 +281,7 @@ router.get('/data/:username', function(req, res) {
     let maxDemeritsReceived = 0;
     let maxDemeritRelationship = 0;
     let totalDemerits = 0;
-    fetchAllUsers().then((userData) => {
+    fetchRelatedUsers(username).then((userData) => {
         users = userData;
     }).then(() => {
         return fetchMentionsRelatedToUser(username);
@@ -732,6 +732,33 @@ function fetchMentionsRelatedToUser(username) {
                         target: node.relationship._toId,
                         title: "Mentioned",
                         count: node.relationship.properties.count
+                    });
+                }
+                resolve(nodes);
+            }
+        })
+    })
+}
+
+function fetchRelatedUsers(username) {
+    return new Promise((resolve, reject) => {
+        db.cypher({
+            query: 'MATCH (from:Slacker)-[r]-(to:Slacker) WHERE from.name = {user} OR to.name = {user} RETURN distinct from',
+            params: {
+                user: username,
+            }
+        }, function(err, results){
+            if (err) {
+                console.error('Error fetching all data:', err);
+                reject();
+            } else {
+                console.log('returning all data');
+                let nodes = [];
+                for (let node of results) {
+                    console.log(node);
+                    nodes.push({
+                        id: node.from._id,
+                        title: node.from.properties.name
                     });
                 }
                 resolve(nodes);
