@@ -268,6 +268,74 @@ router.get('/data', function(req, res) {
     });
 });
 
+router.get('/data/:username', function(req, res) {
+    // Do graph db stuff
+    let username = req.params.username;
+    let users = {};
+    let relationships = [];
+    let maxMentionsGiven = 0;
+    let maxMentionsReceived = 0;
+    let maxMentionRelationship = 0;
+    let totalMentions = 0;
+    let maxDemeritsGiven = 0;
+    let maxDemeritsReceived = 0;
+    let maxDemeritRelationship = 0;
+    let totalDemerits = 0;
+    fetchAllUsers().then((userData) => {
+        users = userData;
+    }).then(() => {
+        return fetchMentionsRelatedToUser(username);
+    }).then((mentions) => {
+        for (let user of users) {
+            user.mentionsReceived = 0;
+            user.mentionsGiven = 0;
+            for (let mention of mentions) {
+                if (mention.source == user.id) {
+                    user.mentionsGiven = user.mentionsGiven + mention.count;
+                    maxMentionRelationship = (maxMentionRelationship > user.mentionsGiven) ? maxMentionRelationship : user.mentionsGiven;
+                }
+                if (mention.target == user.id) {
+                    user.mentionsReceived = user.mentionsReceived + mention.count;
+                    maxMentionRelationship = (maxMentionRelationship > user.mentionsReceived) ? maxMentionRelationship : user.mentionsReceived;
+                }
+            }
+            totalMentions = totalMentions + user.mentionsGiven;
+            maxMentionsReceived = (maxMentionsReceived > user.mentionsReceived) ? maxMentionsReceived : user.mentionsReceived;
+            maxMentionsGiven = (maxMentionsGiven > user.mentionsGiven) ? maxMentionsGiven : user.mentionsGiven;
+        }
+        for (let mention of mentions) {
+            relationships.push(mention);
+        }
+    }).then(() => {
+        return fetchDemeritsRelatedToUser(username);
+    }).then((demerits) => {
+        for (let user of users) {
+            user.demeritsReceived = 0;
+            user.demeritsGiven = 0;
+            for (let demerit of demerits) {
+                if (demerit.source == user.id) {
+                    user.demeritsGiven = user.demeritsGiven + demerit.count;
+                    maxDemeritRelationship = (maxDemeritRelationship > user.demeritsGiven) ? maxDemeritRelationship : user.demeritsGiven;
+                }
+                if (demerit.target == user.id) {
+                    user.demeritsReceived = user.demeritsReceived + demerit.count;
+                    maxDemeritRelationship = (maxDemeritRelationship > user.demeritsReceived) ? maxDemeritRelationship : user.demeritsReceived;
+                }
+            }
+            totalDemerits = totalDemerits + user.demeritsGiven;
+            maxDemeritsReceived = (maxDemeritsReceived > user.demeritsReceived) ? maxDemeritsReceived : user.demeritsReceived;
+            maxDemeritsGiven = (maxDemeritsGiven > user.demeritsGiven) ? maxDemeritsGiven : user.demeritsGiven;
+        }
+        for (let demerit of demerits) {
+            relationships.push(demerit);
+        }
+        res.json({nodes: users, edges: relationships, maxMentionsGiven: maxMentionsGiven, maxMentionsReceived: maxMentionsReceived, maxMentionRelationship: maxMentionRelationship, totalMentions: totalMentions, maxDemeritsGiven: maxDemeritsGiven, maxDemeritsReceived: maxDemeritsReceived, maxDemeritRelationship: maxDemeritRelationship, totalDemerits: totalDemerits});
+    }).catch((error) => {
+        console.log(error);
+        res.status(500).json({message: "An error occurred"});
+    });
+});
+
 app.use('/', router);
 
 app.listen(port);
@@ -592,6 +660,64 @@ function fetchMentions() {
     return new Promise((resolve, reject) => {
         db.cypher({
             query: 'MATCH (from:Slacker)-[relationship:MENTIONED]->(to:Slacker) RETURN relationship',
+        }, function(err, results){
+            if (err) {
+                console.error('Error fetching all data:', err);
+                reject();
+            } else {
+                console.log('returning all data');
+                let nodes = [];
+                for (let node of results) {
+                    console.log(node);
+                    nodes.push({
+                        source: node.relationship._fromId,
+                        target: node.relationship._toId,
+                        title: "Mentioned",
+                        count: node.relationship.properties.count
+                    });
+                }
+                resolve(nodes);
+            }
+        })
+    })
+}
+
+function fetchDemeritsRelatedToUser(username) {
+    return new Promise((resolve, reject) => {
+        db.cypher({
+            query: 'MATCH (from:Slacker)-[relationship:GAVE_DEMERIT]-(to:Slacker) WHERE from.name = {user} OR to.name = {user} RETURN relationship',
+            params: {
+                user: username,
+            }
+        }, function(err, results){
+            if (err) {
+                console.error('Error fetching all data:', err);
+                reject();
+            } else {
+                console.log('returning all data');
+                let nodes = [];
+                for (let node of results) {
+                    console.log(node);
+                    nodes.push({
+                        source: node.relationship._fromId,
+                        target: node.relationship._toId,
+                        title: "Gave Demerit",
+                        count: node.relationship.properties.count
+                    });
+                }
+                resolve(nodes);
+            }
+        })
+    })
+}
+
+function fetchMentionsRelatedToUser(username) {
+    return new Promise((resolve, reject) => {
+        db.cypher({
+            query: 'MATCH (from:Slacker)-[relationship:MENTIONED]-(to:Slacker) WHERE from.name = {user} OR to.name = {user} RETURN relationship',
+            params: {
+                user: username,
+            }
         }, function(err, results){
             if (err) {
                 console.error('Error fetching all data:', err);
